@@ -25,6 +25,7 @@ if (isset($_POST['btnLogin'])) {
             $_SESSION['user_id'] = $userId;
             $_SESSION['username'] = $user['username'];
             $_SESSION['role'] = $roleName;
+            $_SESSION['full_name'] = $user['full_name'];
             // 5. Role-based redirect!
             if ($roleName == 'Teacher' || $roleName == 'Admin') {
                 header("Location: ../professor_dashboard.php");
