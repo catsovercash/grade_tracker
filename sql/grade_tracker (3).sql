@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 02, 2026 at 09:03 AM
+-- Generation Time: Oct 02, 2026 at 09:49 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -114,7 +114,8 @@ INSERT INTO `users` (`user_id`, `full_name`, `email`, `password_hash`, `role_id`
 (4, 'earlbaterbonia', 'earlbaterbonia@iskolarngbayan.pup.edu.ph', '$2y$10$3z.5jAqXlAl36.I80.9PX.1cCoO4ZVQYwej0k7T1voYLIH3s2uP4a', 3, '2026-09-25 07:20:13'),
 (5, 'Kiyumeeehh', 'kiyu@iskolarngbayan.pup.edu.ph', '$2y$10$yqRrOGGQMj/LnGyeYVw9uOfEHVebxBZNZ8/qvepbZOON3/gu.aS.a', 3, '2026-09-25 07:21:52'),
 (10, 'Prof. Maria Santos', 'professor@pup.edu.ph', '$2y$10$XHPI3aezc537I/kqKhKvPeuR1CHH9B/PSzZutSHbs1J/YwgBf1.uK', 2, '2026-10-02 06:57:10'),
-(11, 'Micheal Samia', 'michealsamia@pup.edu.ph', '$2y$10$9Bon37EuoyowduNZSYgyqeva5yKiB012oEq.lkrpRD4VOZrfudiWq', 2, '2026-10-02 07:01:21');
+(11, 'Micheal Samia', 'michealsamia@pup.edu.ph', '$2y$10$9Bon37EuoyowduNZSYgyqeva5yKiB012oEq.lkrpRD4VOZrfudiWq', 2, '2026-10-02 07:01:21'),
+(14, 'Lebron James', 'lebronjames@iskolarngbayan.pup.edu.ph', '$2y$10$seHb.kNlRNiSrAHqLN3qQO63LNErKttuLGlbovxMQbwRJSODW6bDi', 3, '2026-10-02 07:45:21');
 
 --
 -- Indexes for dumped tables
@@ -175,7 +176,7 @@ ALTER TABLE `template_components`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables

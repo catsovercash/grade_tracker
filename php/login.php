@@ -57,17 +57,11 @@ if (isset($_POST['btnLogin'])) {
             $_SESSION['user_id'] = $user['user_id'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role'] = $roleName;
-<<<<<<< Updated upstream
-            $_SESSION['full_name'] = $user['full_name'];
-            // 5. Role-based redirect!
-            if ($roleName == 'Teacher' || $roleName == 'Admin') {
-=======
             $_SESSION['full_name'] = !empty($user['full_name']) ? $user['full_name'] : $user['email'];
             $_SESSION['role_id'] = $roleId;
 
             // 5. Role-based redirect
             if ($isProfessor) {
->>>>>>> Stashed changes
                 header("Location: ../professor_dashboard.php");
             } else {
                 header("Location: ../student_dashboard.php");
