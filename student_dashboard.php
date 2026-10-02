@@ -1,7 +1,16 @@
 <?php
 session_start();
+<<<<<<< Updated upstream
 ?>
 <!DOCTYPE html>
+=======
+if (!isset($_SESSION['user_id'])) {
+    header('Location: index.html');
+    exit();
+}
+?>
+﻿<!DOCTYPE html>
+>>>>>>> Stashed changes
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -62,6 +71,7 @@ session_start();
                 <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs text-white">
                     J
                 </div>
+<<<<<<< Updated upstream
                     <span class="font-semibold text-xs sm:text-sm">
                         <?php echo $_SESSION['full_name']; ?>
                     </span>
@@ -71,6 +81,15 @@ session_start();
                 <i class="fa-solid fa-right-from-bracket"></i>
                 <span>Logout</span>
             </a>
+=======
+                <span class="font-semibold text-xs sm:text-sm"><?php echo htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['email']); ?></span>
+            </div>
+
+            <button onclick="logout()" class="text-xs font-semibold text-maroon-200 hover:text-white transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </button>
+>>>>>>> Stashed changes
         </div>
     </header>
 
@@ -112,7 +131,11 @@ session_start();
         <main class="flex-1 p-6 sm:p-8 space-y-6 max-w-7xl">
 
             <div class="flex items-center justify-between pb-2 border-b border-stone-300/60">
+<<<<<<< Updated upstream
                 <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Welcome,  <?php echo $_SESSION['full_name']; ?> !</h2>
+=======
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Welcome, Jane Doe</h2>
+>>>>>>> Stashed changes
                 <div class="text-right">
                     <span class="text-xs sm:text-sm font-semibold text-stone-500">Sep 25, 2026</span>
                     <button onclick="window.print()" class="block text-[11px] text-maroon-800 font-bold hover:underline no-print">
@@ -299,6 +322,7 @@ session_start();
                             <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200" id="weightTotalBadge">Total Weight: 100%</span>
                         </div>
 
+<<<<<<< Updated upstream
                         <form id="templateForm" action="php/publish_template.php" method="POST" class="space-y-4 text-xs">
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
@@ -308,6 +332,17 @@ session_start();
                                 <div>
                                     <label for="courseTitleInput" class="block font-bold uppercase text-stone-600 mb-1">Course Title</label>
                                     <input type="text" name="courseTitle" id="courseTitleInput" value="Software Engineering" required class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
+=======
+                        <div class="space-y-4 text-xs">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block font-bold uppercase text-stone-600 mb-1">Course Code</label>
+                                    <input type="text" id="courseCodeInput" value="CS-301" class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block font-bold uppercase text-stone-600 mb-1">Course Title</label>
+                                    <input type="text" id="courseTitleInput" value="Software Engineering" class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
+>>>>>>> Stashed changes
                                 </div>
                             </div>
 
@@ -315,6 +350,7 @@ session_start();
                                 <label class="block font-bold uppercase text-stone-600">Assessment Components & Weights</label>
 
                                 <div class="space-y-2" id="componentContainer">
+<<<<<<< Updated upstream
                                     
                                     <!-- Row 1: Quizzes & Seatwork -->
                                     <div class="flex items-center space-x-2 component-row">
@@ -370,17 +406,50 @@ session_start();
                                 </div>
 
                                 <button type="button" id="btnAddRow" onclick="addComponentRow()" class="text-xs font-bold text-maroon-800 hover:text-maroon-900 transition flex items-center space-x-1 pt-1">
+=======
+                                    <div class="flex items-center space-x-2 component-row">
+                                        <input type="text" value="Quizzes & Seatwork" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                                        <input type="number" value="30" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+                                        <span class="font-bold text-stone-400">%</span>
+                                        <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+
+                                    <div class="flex items-center space-x-2 component-row">
+                                        <input type="text" value="Midterm Examination" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                                        <input type="number" value="30" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+                                        <span class="font-bold text-stone-400">%</span>
+                                        <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+
+                                    <div class="flex items-center space-x-2 component-row">
+                                        <input type="text" value="Final Project & Exam" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                                        <input type="number" value="40" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+                                        <span class="font-bold text-stone-400">%</span>
+                                        <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                                    </div>
+                                </div>
+
+                                <button onclick="addComponentRow()" class="text-xs font-bold text-maroon-800 hover:text-maroon-900 transition flex items-center space-x-1 pt-1">
+>>>>>>> Stashed changes
                                     <i class="fa-solid fa-circle-plus"></i>
                                     <span>Add Assessment Component</span>
                                 </button>
                             </div>
 
                             <div class="pt-4 border-t border-stone-200">
+<<<<<<< Updated upstream
                                 <button type="submit" name="btnPublishTemplate" id="btnPublishTemplate" class="w-full py-3 bg-maroon-900 hover:bg-maroon-800 text-white font-bold text-xs rounded-xl shadow-md transition text-center">
                                     Publish Template & Generate Class Code
                                 </button>
                             </div>
                         </form>
+=======
+                                <button onclick="publishTemplate()" class="w-full py-3 bg-maroon-900 hover:bg-maroon-800 text-white font-bold text-xs rounded-xl shadow-md transition text-center">
+                                    Publish Template & Generate Class Code
+                                </button>
+                            </div>
+                        </div>
+>>>>>>> Stashed changes
                     </div>
 
                     <div class="lg:col-span-5 space-y-4">
@@ -851,6 +920,7 @@ session_start();
             const row = document.createElement('div');
             row.className = 'flex items-center space-x-2 component-row';
             row.innerHTML = `
+<<<<<<< Updated upstream
             <select name="component_id[]" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium bg-white outline-none focus:border-maroon-800">
                 <option value="1">Quizzes & Seatwork</option>
                 <option value="2">Midterm Examination</option>
@@ -862,6 +932,12 @@ session_start();
             <input type="number" name="weight[]" value="10" min="0" max="100" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right outline-none focus:border-maroon-800" required>
             <span class="font-bold text-stone-400">%</span>
             <button type="button" onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+=======
+            <input type="text" placeholder="Assessment Name" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+            <input type="number" value="10" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+            <span class="font-bold text-stone-400">%</span>
+            <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+>>>>>>> Stashed changes
         `;
             container.appendChild(row);
             calculateTotalWeight();
@@ -939,4 +1015,8 @@ session_start();
         function logout() { alert('Logged out successfully.'); window.location.reload(); }
     </script>
 </body>
+<<<<<<< Updated upstream
 </html>
+=======
+</html>
+>>>>>>> Stashed changes
