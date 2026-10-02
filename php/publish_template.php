@@ -42,9 +42,9 @@ if (isset($_POST['btnPublishTemplate'])) {
 
         // Redirect back to dashboard with success
         if (isset($_SESSION['role']) && (strcasecmp($_SESSION['role'], 'Professor') === 0 || strcasecmp($_SESSION['role'], 'Teacher') === 0)) {
-            header("Location: ../professor_dashboard.php?template=success");
+            header("Location: ../professor_dashboard.php?template=success&code=" . urlencode($classCode));
         } else {
-            header("Location: ../student_dashboard.php?template=success");
+            header("Location: ../student_dashboard.php?template=success&code=" . urlencode($classCode));
         }
         exit();
     } else {

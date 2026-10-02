@@ -4,8 +4,35 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.html");
     exit();
 }
+include 'php/db.php';
+$userId = (int)$_SESSION['user_id'];
 $userName = htmlspecialchars(!empty($_SESSION['full_name']) ? $_SESSION['full_name'] : $_SESSION['email']);
 $userInitial = strtoupper(substr($userName, 0, 1));
+
+// Fetch enrolled courses for this student from database
+$enrolledCoursesQuery = mysqli_query($conn, "
+    SELECT ec.enrollment_id, gt.template_id, gt.course_code, gt.course_title, gt.class_code 
+    FROM enrolled_courses ec
+    JOIN grade_templates gt ON ec.template_id = gt.template_id
+    WHERE ec.user_id = '$userId'
+    ORDER BY ec.enrolled_at DESC
+");
+$dbEnrolled = [];
+while ($row = mysqli_fetch_assoc($enrolledCoursesQuery)) {
+    $tId = (int)$row['template_id'];
+    $compQuery = mysqli_query($conn, "SELECT component_name, weight FROM template_components WHERE template_id = '$tId'");
+    $comps = [];
+    while ($c = mysqli_fetch_assoc($compQuery)) {
+        $comps[] = ['name' => $c['component_name'], 'weight' => (int)$c['weight']];
+    }
+    $dbEnrolled[] = [
+        'id' => (int)$row['enrollment_id'],
+        'code' => $row['course_code'],
+        'title' => $row['course_title'],
+        'classCode' => $row['class_code'],
+        'components' => $comps
+    ];
+}
 ?>
 ﻿<!DOCTYPE html>
 <html lang="en">
@@ -285,12 +312,12 @@ $userInitial = strtoupper(substr($userName, 0, 1));
                         Enter a unique Class Code provided by your instructor to automatically distribute custom grading weights into your personal grade tracker.
                     </p>
 
-                    <div class="flex gap-3 max-w-md">
-                        <input type="text" id="templateCodeInput" placeholder="Enter Class Code (e.g. CS301-SEC1)" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs font-bold uppercase outline-none focus:border-maroon-800">
-                        <button onclick="enrollTemplateCode()" class="px-5 py-2.5 bg-maroon-900 hover:bg-maroon-800 text-white font-bold text-xs rounded-xl transition shrink-0">
+                    <form action="php/enroll_course.php" method="POST" class="flex gap-3 max-w-md">
+                        <input type="text" name="templateCodeInput" id="templateCodeInput" placeholder="Enter Class Code (e.g. CS301-SEC1)" required class="w-full px-4 py-2.5 rounded-xl border border-stone-300 text-xs font-bold uppercase outline-none focus:border-maroon-800">
+                        <button type="submit" class="px-5 py-2.5 bg-maroon-900 hover:bg-maroon-800 text-white font-bold text-xs rounded-xl transition shrink-0">
                             Enroll & Sync
                         </button>
-                    </div>
+                    </form>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -303,15 +330,15 @@ $userInitial = strtoupper(substr($userName, 0, 1));
                             <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200" id="weightTotalBadge">Total Weight: 100%</span>
                         </div>
 
-                        <div class="space-y-4 text-xs">
+                        <form id="publishTemplateForm" action="php/publish_template.php" method="POST" onsubmit="return validatePublishForm(event)" class="space-y-4 text-xs">
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block font-bold uppercase text-stone-600 mb-1">Course Code</label>
-                                    <input type="text" id="courseCodeInput" value="CS-301" class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
+                                    <input type="text" name="courseCode" id="courseCodeInput" value="CS-301" required class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
                                 </div>
                                 <div>
                                     <label class="block font-bold uppercase text-stone-600 mb-1">Course Title</label>
-                                    <input type="text" id="courseTitleInput" value="Software Engineering" class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
+                                    <input type="text" name="courseTitle" id="courseTitleInput" value="Software Engineering" required class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold text-slate-800 focus:border-maroon-800 outline-none">
                                 </div>
                             </div>
 
@@ -320,39 +347,39 @@ $userInitial = strtoupper(substr($userName, 0, 1));
 
                                 <div class="space-y-2" id="componentContainer">
                                     <div class="flex items-center space-x-2 component-row">
-                                        <input type="text" value="Quizzes & Seatwork" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
-                                        <input type="number" value="30" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+                                        <input type="text" name="component_name[]" value="Quizzes & Seatwork" required class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                                        <input type="number" name="weight[]" value="30" min="1" max="100" onchange="calculateTotalWeight()" required class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
                                         <span class="font-bold text-stone-400">%</span>
-                                        <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button type="button" onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
                                     </div>
 
                                     <div class="flex items-center space-x-2 component-row">
-                                        <input type="text" value="Midterm Examination" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
-                                        <input type="number" value="30" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+                                        <input type="text" name="component_name[]" value="Midterm Examination" required class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                                        <input type="number" name="weight[]" value="30" min="1" max="100" onchange="calculateTotalWeight()" required class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
                                         <span class="font-bold text-stone-400">%</span>
-                                        <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button type="button" onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
                                     </div>
 
                                     <div class="flex items-center space-x-2 component-row">
-                                        <input type="text" value="Final Project & Exam" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
-                                        <input type="number" value="40" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+                                        <input type="text" name="component_name[]" value="Final Project & Exam" required class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                                        <input type="number" name="weight[]" value="40" min="1" max="100" onchange="calculateTotalWeight()" required class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
                                         <span class="font-bold text-stone-400">%</span>
-                                        <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                                        <button type="button" onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
                                     </div>
                                 </div>
 
-                                <button onclick="addComponentRow()" class="text-xs font-bold text-maroon-800 hover:text-maroon-900 transition flex items-center space-x-1 pt-1">
+                                <button type="button" onclick="addComponentRow()" class="text-xs font-bold text-maroon-800 hover:text-maroon-900 transition flex items-center space-x-1 pt-1">
                                     <i class="fa-solid fa-circle-plus"></i>
                                     <span>Add Assessment Component</span>
                                 </button>
                             </div>
 
                             <div class="pt-4 border-t border-stone-200">
-                                <button onclick="publishTemplate()" class="w-full py-3 bg-maroon-900 hover:bg-maroon-800 text-white font-bold text-xs rounded-xl shadow-md transition text-center">
+                                <button type="submit" name="btnPublishTemplate" class="w-full py-3 bg-maroon-900 hover:bg-maroon-800 text-white font-bold text-xs rounded-xl shadow-md transition text-center">
                                     Publish Template & Generate Class Code
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
 
                     <div class="lg:col-span-5 space-y-4">
@@ -449,21 +476,21 @@ $userInitial = strtoupper(substr($userName, 0, 1));
             { id: 2, time: '11:00 AM', mon: '', tue: 'BIO-105', wed: '', thu: 'BIO-105', fri: '', sat: 'IT-ELECT' }
         ];
 
-        let enrolledTemplates = [
-            {
-                id: 1,
-                code: 'CS-301',
-                title: 'Software Engineering',
-                classCode: 'CS301-SEC1',
-                components: [
-                    { name: 'Quizzes & Seatwork', weight: 30 },
-                    { name: 'Midterm Examination', weight: 30 },
-                    { name: 'Final Project & Exam', weight: 40 }
-                ]
-            }
-        ];
+        let enrolledTemplates = <?php echo json_encode($dbEnrolled); ?>;
 
         document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('template') === 'success') {
+                const code = urlParams.get('code') ? `\nClass Sync Code: ${urlParams.get('code')}` : '';
+                alert(`Template published and saved to database!${code}`);
+                switchTab('templates');
+            } else if (urlParams.get('enrolled') === 'success') {
+                alert("Successfully enrolled and synced class template!");
+                switchTab('templates');
+            } else if (urlParams.get('error')) {
+                alert(decodeURIComponent(urlParams.get('error')));
+                switchTab('templates');
+            }
             const selectElement = document.getElementById('thresholdSettingInput');
             if (selectElement) {
                 selectElement.value = targetGwaGoal.toFixed(2);
@@ -823,10 +850,10 @@ $userInitial = strtoupper(substr($userName, 0, 1));
             const row = document.createElement('div');
             row.className = 'flex items-center space-x-2 component-row';
             row.innerHTML = `
-            <input type="text" placeholder="Assessment Name" class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
-            <input type="number" value="10" onchange="calculateTotalWeight()" class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
+            <input type="text" name="component_name[]" placeholder="Assessment Name" required class="comp-name flex-1 px-3 py-2 rounded-xl border border-stone-300 font-medium">
+            <input type="number" name="weight[]" value="10" min="1" max="100" onchange="calculateTotalWeight()" required class="comp-weight w-24 px-3 py-2 rounded-xl border border-stone-300 font-bold text-right">
             <span class="font-bold text-stone-400">%</span>
-            <button onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
+            <button type="button" onclick="removeRow(this)" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
         `;
             container.appendChild(row);
             calculateTotalWeight();
@@ -851,27 +878,19 @@ $userInitial = strtoupper(substr($userName, 0, 1));
             return total;
         }
 
-        function publishTemplate() {
+        function validatePublishForm(e) {
             const total = calculateTotalWeight();
-            if (total !== 100) return alert(`Total weight must equal 100%. Current total is ${total}%.`);
-
+            if (total !== 100) {
+                alert(`Total weight must equal 100%. Current total is ${total}%.`);
+                return false;
+            }
             const code = document.getElementById('courseCodeInput').value.trim();
             const title = document.getElementById('courseTitleInput').value.trim();
-            if (!code || !title) return alert('Please enter Course Code and Title.');
-
-            const compNames = document.querySelectorAll('.comp-name');
-            const compWeights = document.querySelectorAll('.comp-weight');
-            let components = [];
-
-            compNames.forEach((n, i) => {
-                components.push({ name: n.value || 'Component', weight: parseFloat(compWeights[i].value) || 0 });
-            });
-
-            const generatedCode = `${code.replace(/[^a-zA-Z0-9]/g, '')}-SEC${Math.floor(1 + Math.random() * 9)}`;
-
-            enrolledTemplates.push({ id: Date.now(), code, title, classCode: generatedCode, components });
-            renderTemplatesList();
-            alert(`Template successfully published!\nShared Class Code: ${generatedCode}`);
+            if (!code || !title) {
+                alert('Please enter Course Code and Title.');
+                return false;
+            }
+            return true;
         }
 
         function enrollTemplateCode() {
@@ -895,9 +914,8 @@ $userInitial = strtoupper(substr($userName, 0, 1));
         }
 
         function removeTemplate(id) {
-            if (confirm("Remove this enrolled template?")) {
-                enrolledTemplates = enrolledTemplates.filter(t => t.id !== id);
-                renderTemplatesList();
+            if (confirm("Remove this course template?")) {
+                window.location.href = `php/delete_template.php?id=${id}`;
             }
         }
 
