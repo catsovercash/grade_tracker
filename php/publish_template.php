@@ -3,13 +3,13 @@
 session_start();
 include 'db.php';
 
-if (isset($_POST['btnPublishTemplate'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!empty($_POST['courseCode']) || isset($_POST['btnPublishTemplate']))) {
     if (!isset($_SESSION['user_id'])) {
         header("Location: ../index.html");
         exit();
     }
 
-    $userId = $_SESSION['user_id'];
+    $userId = (int)$_SESSION['user_id'];
     $courseCode = trim($_POST['courseCode'] ?? '');
     $courseTitle = trim($_POST['courseTitle'] ?? '');
 
@@ -39,6 +39,11 @@ if (isset($_POST['btnPublishTemplate'])) {
                 mysqli_stmt_execute($stmtComp);
             }
         }
+
+        // 3. Automatically link creator in enrolled_courses so it shows up in their active courses
+        $stmtEnroll = mysqli_prepare($conn, "INSERT IGNORE INTO enrolled_courses (user_id, template_id) VALUES (?, ?)");
+        mysqli_stmt_bind_param($stmtEnroll, "ii", $userId, $templateId);
+        mysqli_stmt_execute($stmtEnroll);
 
         // Redirect back to dashboard with success
         if (isset($_SESSION['role']) && (strcasecmp($_SESSION['role'], 'Professor') === 0 || strcasecmp($_SESSION['role'], 'Teacher') === 0)) {

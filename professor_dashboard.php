@@ -205,6 +205,7 @@ while ($row = mysqli_fetch_assoc($templatesQuery)) {
             if (urlParams.get('template') === 'success') {
                 const code = urlParams.get('code') ? `\nClass Sync Code: ${urlParams.get('code')}` : '';
                 alert(`Syllabus template published and saved to database!${code}\nShare this code with your students.`);
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
             renderTemplatesList();
             calculateTotalWeight();
@@ -300,6 +301,16 @@ while ($row = mysqli_fetch_assoc($templatesQuery)) {
             if (!code || !title) {
                 alert('Please enter Course Code and Title.');
                 return false;
+            }
+            const submitBtn = document.querySelector('button[name="btnPublishTemplate"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Publishing...';
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'btnPublishTemplate';
+                hiddenInput.value = '1';
+                e.target.appendChild(hiddenInput);
             }
             return true;
         }

@@ -9,13 +9,13 @@ $userId = (int)$_SESSION['user_id'];
 $userName = htmlspecialchars(!empty($_SESSION['full_name']) ? $_SESSION['full_name'] : $_SESSION['email']);
 $userInitial = strtoupper(substr($userName, 0, 1));
 
-// Fetch enrolled courses for this student from database
+// Fetch enrolled or created courses for this student from database
 $enrolledCoursesQuery = mysqli_query($conn, "
-    SELECT ec.enrollment_id, gt.template_id, gt.course_code, gt.course_title, gt.class_code 
-    FROM enrolled_courses ec
-    JOIN grade_templates gt ON ec.template_id = gt.template_id
-    WHERE ec.user_id = '$userId'
-    ORDER BY ec.enrolled_at DESC
+    SELECT DISTINCT gt.template_id, gt.course_code, gt.course_title, gt.class_code, ec.enrollment_id 
+    FROM grade_templates gt
+    LEFT JOIN enrolled_courses ec ON gt.template_id = ec.template_id AND ec.user_id = '$userId'
+    WHERE ec.user_id = '$userId' OR gt.user_id = '$userId'
+    ORDER BY gt.created_at DESC
 ");
 $dbEnrolled = [];
 while ($row = mysqli_fetch_assoc($enrolledCoursesQuery)) {
@@ -26,7 +26,9 @@ while ($row = mysqli_fetch_assoc($enrolledCoursesQuery)) {
         $comps[] = ['name' => $c['component_name'], 'weight' => (int)$c['weight']];
     }
     $dbEnrolled[] = [
-        'id' => (int)$row['enrollment_id'],
+        'id' => $tId,
+        'templateId' => $tId,
+        'enrollmentId' => (int)($row['enrollment_id'] ?? 0),
         'code' => $row['course_code'],
         'title' => $row['course_title'],
         'classCode' => $row['class_code'],
@@ -484,12 +486,15 @@ while ($row = mysqli_fetch_assoc($enrolledCoursesQuery)) {
                 const code = urlParams.get('code') ? `\nClass Sync Code: ${urlParams.get('code')}` : '';
                 alert(`Template published and saved to database!${code}`);
                 switchTab('templates');
+                window.history.replaceState({}, document.title, window.location.pathname);
             } else if (urlParams.get('enrolled') === 'success') {
                 alert("Successfully enrolled and synced class template!");
                 switchTab('templates');
+                window.history.replaceState({}, document.title, window.location.pathname);
             } else if (urlParams.get('error')) {
                 alert(decodeURIComponent(urlParams.get('error')));
                 switchTab('templates');
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
             const selectElement = document.getElementById('thresholdSettingInput');
             if (selectElement) {
@@ -889,6 +894,16 @@ while ($row = mysqli_fetch_assoc($enrolledCoursesQuery)) {
             if (!code || !title) {
                 alert('Please enter Course Code and Title.');
                 return false;
+            }
+            const submitBtn = document.querySelector('button[name="btnPublishTemplate"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Publishing...';
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'btnPublishTemplate';
+                hiddenInput.value = '1';
+                e.target.appendChild(hiddenInput);
             }
             return true;
         }

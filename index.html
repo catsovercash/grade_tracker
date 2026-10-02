@@ -432,8 +432,10 @@
             const params = new URLSearchParams(window.location.search);
             if (params.get('registered') === 'success') {
                 showAlert('Account registered successfully! You can now log in.', 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
             } else if (params.get('error')) {
                 showAlert(decodeURIComponent(params.get('error')), 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
     </script>
