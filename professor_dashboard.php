@@ -54,15 +54,15 @@ $userInitial = strtoupper(substr($userName, 0, 1));
             <div class="flex items-center space-x-6 text-sm">
                 <div class="flex items-center space-x-2.5">
                     <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs text-white">
-                        P
+                        <?php echo $userInitial; ?>
                     </div>
                     <span class="font-semibold text-xs sm:text-sm hidden lg:inline"><?php echo $userName; ?></span>
                 </div>
 
-                <button onclick="logout()" class="text-xs font-semibold text-maroon-200 hover:text-white transition flex items-center space-x-1.5">
+                <a href="php/logout.php" class="text-xs font-semibold text-maroon-200 hover:text-white transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span class="hidden sm:inline">Logout</span>
-                </button>
+                </a>
             </div>
         </div>
     </header>
@@ -300,7 +300,7 @@ $userInitial = strtoupper(substr($userName, 0, 1));
             }
         }
 
-        function logout() { alert('Logged out successfully.'); window.location.reload(); }
+        function logout() { window.location.href = 'php/logout.php'; }
     </script>
 </body>
 </html>
